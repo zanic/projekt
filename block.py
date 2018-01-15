@@ -8,7 +8,7 @@ class Block(object):
 		# Looking for index, timestamp, data, prev_hash, nonce
 
 		for key, value in dictionary.items():
-			settatr(self, key, value)
+			setattr(self, key, value)
 
 		if not hasattr(self, 'nonce'):
 			#generate it

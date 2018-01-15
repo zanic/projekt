@@ -16,7 +16,7 @@ def calculate_hash(index, prev_hash, data, timestamp, nonce):
 def mine(last_block):
 	index = int(last_block.index) + 1
 	timestamp = datetime.now()
-	data = "The blcok #&s" % (int(last_block.index) + 1)	# random string for now
+	data = "The block #%s" % (int(last_block.index) + 1)	# random string for now
 	prev_hash = last_block.hash
 	nonce = 0
 	
