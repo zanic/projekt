@@ -7,7 +7,7 @@ from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 
-import utils
+import misc
 
 
 class BlockType(Enum):
@@ -30,16 +30,16 @@ class Block:
     # message_hash is used primarily for key lookup
     @property
     def message_hash(self):
-        return utils.gen_hash(self.message)
+        return misc.gen_hash(self.message)
 
     @property
     def hash(self):
-        return utils.gen_hash(self.__repr__())
+        return misc.gen_hash(self.__repr__())
 
     @property
     def hash_body(self):
         """Hash everything but the signature and signatory hash"""
-        return utils.gen_hash(self.body)
+        return misc.gen_hash(self.body)
 
     @property
     def body(self):
@@ -47,7 +47,7 @@ class Block:
 
         body = {k: v for k, v in self.__dict__.items() if
                 k != 'signature' and k != 'signatory_hash' and k != 'ptr_previous'}
-        return json.dumps(body, cls=utils.ComplexEncoder, sort_keys=True)
+        return json.dumps(body, cls=misc.ComplexEncoder, sort_keys=True)
 
     # @property
     # def signature_decoded(self):
@@ -72,8 +72,8 @@ class Block:
         signer = PKCS1_v1_5.new(privkey)
 
         # Set the block signature values
-        self.signature = utils.encode(signer.sign(h))
-        self.signatory_hash = utils.gen_hash(utils.encode_key(privkey))
+        self.signature = misc.encode(signer.sign(h))
+        self.signatory_hash = misc.gen_hash(misc.encode_key(privkey))
 
         # Validate our signature is correct
         if not self.validate(privkey.publickey()):
@@ -87,10 +87,10 @@ class Block:
 
         # If pubkey is a string, turn it into a key object
         #if isinstance(pubkey, str):
-        pubkey = RSA.importKey(utils.decode(pubkey))
+        pubkey = RSA.importKey(misc.decode(pubkey))
         #print(pubkey)
         signer = PKCS1_v1_5.new(pubkey)
-        return signer.verify(SHA256.new(self.body.encode('utf-8')), utils.decode(self.signature))
+        return signer.verify(SHA256.new(self.body.encode('utf-8')), misc.decode(self.signature))
 
     def __str__(self):
         return '\t\tType: {}{}\n' \
@@ -108,7 +108,7 @@ class Block:
 
     def __repr__(self):
         body = {k: v for k, v in self.__dict__.items() if k != 'ptr_previous'}
-        return json.dumps(body, cls=utils.ComplexEncoder, sort_keys=True)
+        return json.dumps(body, cls=misc.ComplexEncoder, sort_keys=True)
 
     def repr_json(self):
         return self.__dict__

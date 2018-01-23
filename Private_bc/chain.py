@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
-import utils
-import settings
+import misc
+import config
 
-class Ledger:
+class Chain:
     def __init__(self):
         self.tail = None
         self.root = None
@@ -20,22 +20,22 @@ class Ledger:
         else:
             return None
 
-    def slice_ledger(self, block_hash = None):
+    def slice_chain(self, block_hash = None):
         # Return the whole list if no specific block hash is given
         if block_hash is None:
             return self._list
         else:
-            # Step through the entire ledger in reverse order
-            for i, block in utils.reverse_enumerate(self._list):
+            # Step through the entire chain in reverse order
+            for i, block in misc.reverse_enumerate(self._list):
                 # If we have a match, return the sublist
                 if block.hash == block_hash:
                     return self._list[i+1:]
 
-            # The requested block isn't in our ledger! Return None
+            # The requested block isn't in our chain! Return None
             return None
 
     def search(self, query, match_block=True):
-        """Search through the ledger
+        """Search through the chain
 
         Arguments:
         query: search string
@@ -89,11 +89,11 @@ class Ledger:
                 raise ValueError('Predecessor hash does not match the last accepted block', block.predecessor,
                                  self.tail.hash)
 
-            # Check that block signer (signatory_hash) is present on our ledger and valid
+            # Check that block signer (signatory_hash) is present on our chain and valid
             if not self.validate_block(block):
                 raise ValueError('The block is not signed by an accepted key', block.signature)
 
-            # Hash is correct, Signatory Exists, Signature is Valid: Add to ledger!
+            # Hash is correct, Signatory Exists, Signature is Valid: Add to chain!
             self._list.append(block)
             self.tail = block
 
@@ -101,7 +101,7 @@ class Ledger:
     def validate_block(self, block):
         from block import BlockType
 
-        # Search through the ledger for blocks with a message hash that matches the signatory hash
+        # Search through the chain for blocks with a message hash that matches the signatory hash
         idx, signatory = self.search(block.signatory_hash, match_block=False)
 
         # Check that the most recent block was of type key (not revoke)

@@ -18,7 +18,7 @@ class Level(Enum):
     LOW = 3         # Used for repeating messages (eg heartbeat)
     MEDIUM = 2      # Use this level for low priority logs (messaging, etc)
     HIGH = 1        # Use this level for typical debug logging such as errors, spawning threads, and state change
-    FORCE = 0       # Use this level to force printing - useful for errors affecting ledger state
+    FORCE = 0       # Use this level to force printing - useful for errors affecting chain state
 
 
 def log_message(message, debug=Level.HIGH):
@@ -26,7 +26,7 @@ def log_message(message, debug=Level.HIGH):
     LOW: Use for repeating messages (eg heartbeat)
     MEDIUM: Use for low priority (eg messaging)
     HIGH (default): Use for typical debug logging such as errors, state change, thread spawning, etc
-    FORCE: Force printing. Use to print to console regardless of debug state or for errors affecting ledger state"""
+    FORCE: Force printing. Use to print to console regardless of debug state or for errors affecting chain state"""
 
     if config.debug >= 0:
         print(message)
