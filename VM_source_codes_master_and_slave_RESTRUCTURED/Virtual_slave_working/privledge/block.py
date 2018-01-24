@@ -49,6 +49,9 @@ class Block:
                 k != 'signature' and k != 'signatory_hash' and k != 'ptr_previous'}
         return json.dumps(body, cls=misc.ComplexEncoder, sort_keys=True)
 
+    # @property
+    # def signature_decoded(self):
+    #     return base64.b64decode(self.signature)
 
     @property
     def is_signed(self):
@@ -82,9 +85,10 @@ class Block:
     def validate(self, pubkey):
         """Validate this block's signature with the supplied public key"""
 
-        # Turn pubkey into a key object
-        if isinstance(pubkey, str):
-            pubkey = RSA.importKey(misc.decode(pubkey))
+        # If pubkey is a string, turn it into a key object
+        #if isinstance(pubkey, str):
+        pubkey = RSA.importKey(misc.decode(pubkey))
+        #print(pubkey)
         signer = PKCS1_v1_5.new(pubkey)
         return signer.verify(SHA256.new(self.body.encode('utf-8')), misc.decode(self.signature))
 

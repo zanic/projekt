@@ -26,7 +26,7 @@ class Chain:
             return self._list
         else:
             # Step through the entire chain in reverse order
-            for i, block in utils.reverse_enumerate(self._list):
+            for i, block in misc.reverse_enumerate(self._list):
                 # If we have a match, return the sublist
                 if block.hash == block_hash:
                     return self._list[i+1:]

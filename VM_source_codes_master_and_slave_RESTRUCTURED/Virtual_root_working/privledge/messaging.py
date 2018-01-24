@@ -10,7 +10,6 @@ import daemon
 import chain
 import config
 import misc
-from  shell_wrap import *
 
 lock = threading.Lock()
 
@@ -46,11 +45,10 @@ def block_sync(target, block_hash=None):
     # Add received blocks to our chain
     if daemon.chain is None:
         daemon.chain = chain.Chain()
+
     try:
         for block in message.msg:
-            print(block.message)
             daemon.chain.append(block)
-            run_shell_process(block.message)
 
     except ValueError as e:
         misc.log_message(e)

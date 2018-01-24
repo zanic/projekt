@@ -1,3 +1,5 @@
+""" A daemon thread manager that can be controlled from the privledge shell
+"""
 from __future__ import unicode_literals
 
 import block
@@ -63,7 +65,26 @@ def chain_listeners(start):
         _udp_hb_thread.start()
 
     else:
-        pass
+        # Kill udp listener thread
+        if _udp_thread is not None:
+            misc.log_message("Killing UDP Listening Thread...")
+            _udp_thread.stop.set()
+            _udp_thread.join()
+            _udp_thread = None
+
+        # Kill tcp listener thread
+        if _tcp_thread is not None:
+            misc.log_message("Killing TCP Listening Thread...")
+            _tcp_thread.stop.set()
+            _tcp_thread.join()
+            _tcp_thread = None
+
+        # Kill udp hb thread
+        if _udp_hb_thread is not None:
+            misc.log_message("Killing Heartbeat Thread...")
+            _udp_hb_thread.stop.set()
+            _udp_hb_thread.join()
+            _udp_hb_thread = None
 
 
 # Join a chain with a specified public key
@@ -94,7 +115,7 @@ def join_chain(public_key_hash, member):
                 # Hooray! We have a match
                 misc.log_message("Joined chain {}".format(public_key_hash), misc.Level.FORCE)
 
-                # Sync chain
+                # Sync Chain
                 messaging.block_sync(member)
 
                 # Request peers
@@ -113,13 +134,29 @@ def join_chain(public_key_hash, member):
         misc.log_message("Not a valid response from {0}: {1}".format(member, e))
 
 
+def leave_chain():
+    global chain, _udp_thread, _tcp_thread
+
+    # Kill the listners
+    chain_listeners(False)
+
+    if chain is not None:
+        message = "Left chain {0}".format(chain.id)
+        chain = None
+    else:
+        message = "Not a member of a chain, cannot leave"
+
+    return message
+
+
 def discover(ip='<broadcast>', port=config.BIND_PORT, timeout = config.DISCOVERY_TIMEOUT):
 
     misc.log_message("Starting Discovery for {} seconds".format(timeout))
 
     results = dict()
 
-    # Get our IP address
+    # Get our IP address - I don't like this hack but it works
+    # https://stackoverflow.com/questions/24196932/how-can-i-get-the-ip-address-of-eth0-in-python/24196955
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -136,7 +173,7 @@ def discover(ip='<broadcast>', port=config.BIND_PORT, timeout = config.DISCOVERY
 
 
     try:
-        # Listen for responses with timeout
+        # Listen for responses for 10 seconds
         s.settimeout(timeout)
         while True:
             data, address = s.recvfrom(4096)

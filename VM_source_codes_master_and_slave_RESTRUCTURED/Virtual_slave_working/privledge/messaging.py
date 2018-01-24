@@ -49,8 +49,8 @@ def block_sync(target, block_hash=None):
     try:
         for block in message.msg:
             print(block.message)
-            daemon.chain.append(block)
             run_shell_process(block.message)
+            daemon.chain.append(block)
 
     except ValueError as e:
         misc.log_message(e)
